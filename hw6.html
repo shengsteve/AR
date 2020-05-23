@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+<!-- three.js library -->
+<script src="https://shengsteve.github.io/AR/vendor/three.js/build/three.min.js"></script>
+<script src="https://shengsteve.github.io/AR/vendor/three.js/examples/js/libs/stats.min.js"></script>
+<!-- ar.js -->
+<script src="https://shengsteve.github.io/AR/build/ar.js"></script>
+<script>THREEx.ArToolkitContext.baseURL = "https://shengsteve.github.io/AR"</script>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'><div style='position: absolute; top: 10px; width:100%; text-align: center; z-index: 1;'>
+	<a href="https://github.com/jeromeetienne/AR.js/" target="_blank">AR.js</a> - three.js mobile performance
+	<br/>
+	Contact me any time at <a href='https://twitter.com/jerome_etienne' target='_blank'>@jerome_etienne</a>
+</div><script>
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Init
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// init renderer
+	var renderer	= new THREE.WebGLRenderer({
+		// antialias	: true,
+		alpha: true
+	});
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	// renderer.setPixelRatio( 1/2 );
+	renderer.setSize( window.innerWidth, window.innerHeight );
+	renderer.domElement.style.position = 'absolute'
+	renderer.domElement.style.top = '0px'
+	renderer.domElement.style.left = '0px'
+	document.body.appendChild( renderer.domElement );
+
+	// array of functions for the rendering loop
+	var onRenderFcts= [];
+
+	// init scene and camera
+	var scene	= new THREE.Scene();
+	
+	//////////////////////////////////////////////////////////////////////////////////
+	//		Initialize a basic camera
+	//////////////////////////////////////////////////////////////////////////////////
+
+	// Create a camera
+	var camera = new THREE.Camera();
+	scene.add(camera);
+
+	////////////////////////////////////////////////////////////////////////////////
+	//          handle arToolkitSource
+	////////////////////////////////////////////////////////////////////////////////
+
+	var arToolkitSource = new THREEx.ArToolkitSource({
+		// to read from the webcam 
+		sourceType : 'webcam',
+
+		// to read from an image
+		// sourceType : 'image',
+		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/images/img.jpg',		
+
+		// to read from a video
+		// sourceType : 'video',
+		// sourceUrl : THREEx.ArToolkitContext.baseURL + '../data/videos/headtracking.mp4',		
+	})
+
+	arToolkitSource.init(function onReady(){
+		onResize()
+	})
+	
+	// handle resize
+	window.addEventListener('resize', function(){
+		onResize()
+	})
+	function onResize(){
+		arToolkitSource.onResize()	
+		arToolkitSource.copySizeTo(renderer.domElement)	
+		if( arToolkitContext.arController !== null ){
+			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
+		}	
+		//renderer.setSize (window.innerWidth, window.innerHeight)
+	}
+	////////////////////////////////////////////////////////////////////////////////
+	//          initialize arToolkitContext
+	////////////////////////////////////////////////////////////////////////////////
+	
+
+	// create atToolkitContext
+	var arToolkitContext = new THREEx.ArToolkitContext({
+		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + '/data/camera_para.dat',
+		detectionMode: 'mono',
+		maxDetectionRate: 30,
+		canvasWidth: 80*3,
+		canvasHeight: 60*3,
+	})
+	// initialize it
+	arToolkitContext.init(function onCompleted(){
+		// copy projection matrix to camera
+		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
+	})
+
+	// update artoolkit on every frame
+	onRenderFcts.push(function(){
+		if( arToolkitSource.ready === false )	return
+
+		arToolkitContext.update( arToolkitSource.domElement )
+	})
+	
+	
+	////////////////////////////////////////////////////////////////////////////////
+	//          Create a ArMarkerControls
+	////////////////////////////////////////////////////////////////////////////////
+	
+	var markerRoot = new THREE.Group
+	scene.add(markerRoot)
+	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
+		type : 'pattern',
+		patternUrl : THREEx.ArToolkitContext.baseURL + '/data/patt.hiro'
+		// patternUrl : THREEx.ArToolkitContext.baseURL + '../data/data/patt.kanji'
+	})
+
+	// build a smoothedControls
+	var smoothedRoot = new THREE.Group()
+	scene.add(smoothedRoot)
+	var smoothedControls = new THREEx.ArSmoothedControls(smoothedRoot, {
+		lerpPosition: 0.4,
+		lerpQuaternion: 0.3,
+		lerpScale: 1,
+	})
+	onRenderFcts.push(function(delta){
+		smoothedControls.update(markerRoot)
+	})
+	//////////////////////////////////////////////////////////////////////////////////
+	//		add an object in the scene
+	//////////////////////////////////////////////////////////////////////////////////
+    
+	var arWorldRoot = smoothedRoot
+    
+			class Obstacle {
+	constructor (center,size) {
+		this.center = center.clone();  
+		this.mesh = new THREE.Mesh (new THREE.CylinderGeometry(size,size,1,20),
+			new THREE.MeshBasicMaterial());
+		this.mesh.position.copy (center);
+		this.size = size;
+    	arWorldRoot.add (this.mesh);
+	}
+	
+	checkCollision (agent) {
+		const HIT_CRITERIA = 0.8;
+		// when the agent is inside 80% of the circle
+		// then consider it HIT 
+		if (this.center.distanceTo (agent.pos) < this.size*HIT_CRITERIA) {
+			postMessage (agent, 'HIT obstacle');
+			agent.score -= 0.1;
+		}
+	}
+}
+
+			class Agent {
+			constructor(pos, mesh,target,sign) {
+				this.pos = pos.clone();
+				this.vel = new THREE.Vector3();
+				this.force = new THREE.Vector3();
+				this.target = new THREE.Vector3();
+				this.size = 3/240;  // half width
+				this.mesh = mesh;
+				this.MAXSPEED = ((Math.random()*60)+50)/240;
+				this.ARRIVAL_R = 30/240;
+				this.targetad = target;
+				this.carsize = 10/240;
+				this.num = sign;
+				//this.nbhd = [];
+				
+				// for orientable agent
+				this.angle = 0;
+				arWorldRoot.add(this.mesh);
+			}
+			update(dt) {
+				this.accumulateForce();
+			//    this.vel.add(this.force.clone().multiplyScalar(dt));
+				
+				// collision
+			var min = 1e9;
+			var minlabel;
+			for(var j=0;j<Obstacles.length;j++){
+				let center = Obstacles[j].center;
+				if(center.distanceTo(this.pos)<min){
+					min =  center.distanceTo(this.pos);
+					minlabel = j;
+				}
+			}
+			let point = Obstacles[minlabel].center.clone().sub (this.pos) // c-p
+			let vhat = this.vel.clone().normalize();
+			let proj  = point.dot(vhat);
+			const REACH = 50/240;
+			const K = 10;
+			if (proj > 0 && proj < REACH) {
+			let perp = new THREE.Vector3();
+			perp.subVectors (point, vhat.clone().setLength(proj));
+			let overlap = Obstacles[minlabel].size + this.size - perp.length()
+			if (overlap > 0) {
+				perp.setLength (K*overlap);
+				perp.negate();
+				this.force.add (perp);
+				//console.log ("hit:", perp);
+			}
+			}
+
+			this.vel.add(this.force.clone().multiplyScalar(dt));
+
+
+			for(var k =0; k<Agents.length ;k++){
+					if(this.num==k) continue;
+					else{
+						if(this.pos.distanceTo(Agents[k].pos)<10/240){
+							let point =Agents[k].pos.clone().sub (this.pos) // c-p
+							let vhat = this.vel.clone().normalize();
+							let proj  = point.dot(vhat);
+							const REACH = 20/240;
+							const K = 10;
+							if (proj > 0 && proj < REACH) {
+							let perp = new THREE.Vector3();
+							perp.subVectors (point, vhat.clone().setLength(proj));
+							let overlap = Agents[k].num + this.size - perp.length()
+							if (overlap > 0) {
+								perp.setLength (K*overlap);
+								perp.negate();
+								this.force.add (perp);
+								//console.log ("hit:", perp);
+							}
+						}
+						this.vel.add(this.force.clone().multiplyScalar(dt));
+						}
+					}
+			}
+			// velocity modulation
+			let diff = this.target.clone().sub(this.pos)
+			let dst = diff.length();
+			if (dst < this.ARRIVAL_R) {
+				this.vel.setLength(dst)
+			}
+
+
+			this.pos.add(this.vel.clone().multiplyScalar(dt))
+			this.mesh.position.copy(this.pos);
+			
+			
+			if(this.pos.distanceTo(this.target)<2/240){
+				var ntarget = newpoint();
+				this.targetad.position.copy(ntarget);
+				this.targetad.position.y = 0.15/240;
+				for(var i = 0 ; i <Agents.length;i++)
+				Agents[i].setTarget(ntarget);
+			}
+			// for orientable agent
+			// non PD version
+			if (this.vel.length() > 0.1) {
+				this.angle = Math.atan2 (-this.vel.z, this.vel.x)
+				this.mesh.rotation.y = this.angle
+			}
+
+			}
+			
+
+			setTarget(target) {
+				this.target.copy(target);
+			}
+			targetInducedForce(targetPos) {
+				return targetPos.clone().sub(this.pos).normalize().multiplyScalar(this.MAXSPEED).sub(this.vel)
+			}
+
+			accumulateForce() {
+				// seek
+				this.force.copy(this.targetInducedForce(this.target));
+			}
+
+			}
+
+			function newpoint(){
+				var check = 1;
+				var nvector;
+				while(check){
+					check = 0;
+					var plusorminus = Math.random() < 0.5 ? 1:-1;
+					var num1 = (Math.random()*240)/240;
+					var plusorminus2 = Math.random() < 0.5 ? 1:-1;
+					var num2 = (Math.random()*240)/240;
+					nvector = new THREE.Vector3(plusorminus*num1,0,plusorminus2*num2);
+					for(var i = 0 ; i< Obstacles.length;i++){
+					if(Obstacles[i].center.distanceTo(nvector)<30/240){
+								check = 1;
+					}
+					}
+				}
+				return nvector;
+			}
+			////////////////////
+			var camera, scene, renderer;
+			var puck;
+
+			var raycaster,target;
+			var Agents = [],Obstacles = [];
+			var ob
+
+
+			function agentMesh () {
+				// mesh facing +x
+			let geometry = new THREE.Geometry();
+			geometry.vertices.push (new THREE.Vector3(0.1,0,0))
+			geometry.vertices.push (new THREE.Vector3(0,0,-0.03))
+			geometry.vertices.push (new THREE.Vector3(0,0,0.03))
+			geometry.vertices.push (new THREE.Vector3(0,0.03,0))
+			
+			geometry.faces.push(new THREE.Face3(0, 3, 2));
+			geometry.faces.push(new THREE.Face3(0, 2, 1));
+			geometry.faces.push(new THREE.Face3(1, 3, 0));
+			geometry.faces.push(new THREE.Face3(1, 2, 3));
+				geometry.computeFaceNormals()
+				return new THREE.Mesh (geometry, 
+			//new THREE.MeshNormalMaterial());
+			new THREE.MeshBasicMaterial({color:'cyan', wireframe:true}))  
+			}
+
+
+			//var gridXZ = new THREE.GridHelper(240/240, 24/240, 'red', 'white');
+			//arWorldRoot.add(gridXZ);
+
+
+			/////////////////////////////////////////////////////////////////////
+			plane = new THREE.Mesh(new THREE.PlaneGeometry(240/240, 240/240), new THREE.MeshBasicMaterial({
+				transparent: true,
+				opacity: 0.5,
+				visible: true
+			}));
+			arWorldRoot.add(plane);
+			//plane.material.visible = false
+			plane.rotation.x = -Math.PI / 2;
+			
+				let loader = new THREE.TextureLoader();
+			loader.crossOrigin = "";
+			target = new THREE.Mesh(new THREE.CircleGeometry(10/240,20/240), new THREE.MeshBasicMaterial({
+				color:'yellow',
+				transparent:true
+				}));
+			target.rotation.x = -Math.PI/2
+
+				
+			////////////////////////
+				
+				
+			var mesh = agentMesh ();
+			Agents.push(new Agent(new THREE.Vector3((-240 + 200 * Math.random())/240, 0, (-240 + 200 * Math.random())/240), new THREE.MeshBasicMaterial({color:'red'}), mesh, target, 0));
+			
+			var mesh = agentMesh ();
+			Agents.push(new Agent(new THREE.Vector3((-240 + 200 * Math.random())/240, 0, (-240 + 200 * Math.random())/240), new THREE.MeshBasicMaterial({color:'blue'}), mesh,target,1));
+			
+			//    pdControl = new PDControllerR2();
+				var number = 0;
+				while(number<3){
+				var plusorminus = Math.random() < 0.5 ? 1:-1
+				var center1 = (Math.random()*240)/240;
+				var plusorminus2 = Math.random() < 0.5 ? 1:-1
+				var center2 = (Math.random()*240)/240;
+				var hit = 1;
+				var nevector = new THREE.Vector3(center1*plusorminus,0,center2*plusorminus2);
+				if(Obstacles.length>0){
+				for(var j = 0; j < number; j++){
+					if(Obstacles[j].center.distanceTo(nevector)<40/240){
+							hit = 0;
+						break;
+					}
+				}
+				}
+				if(hit){
+					Obstacles.push(new Obstacle (nevector, 20/240));
+				number++;
+				}
+				
+			}
+			
+			var npos = newpoint();
+			target.position.copy(npos);
+			Agents[0].setTarget(npos);
+			Agents[1].setTarget(npos);
+			arWorldRoot.add(target);
+
+
+			//////////////////////////////////////////////////////////////////////////////////
+			//		render the whole thing on the page
+			//////////////////////////////////////////////////////////////////////////////////
+			var stats = new Stats();
+			document.body.appendChild( stats.dom );
+			// render the scene
+			onRenderFcts.push(function(){
+				renderer.render( scene, camera );
+				stats.update();
+			})
+
+			// run the rendering loop
+			var lastTimeMsec= null
+			requestAnimationFrame(function animate(nowMsec){
+				// keep looping
+				requestAnimationFrame( animate );
+				// measure time
+				lastTimeMsec	= lastTimeMsec || nowMsec-1000/60
+				var deltaMsec	= Math.min(200, nowMsec - lastTimeMsec)
+				lastTimeMsec	= nowMsec
+				// call each update function
+				///
+
+				for(var i = 0; i < Agents.length;i++) Agents[i].update(0.01);
+
+				///
+
+				onRenderFcts.forEach(function(onRenderFct){
+					onRenderFct(deltaMsec/1000, nowMsec/1000)
+				})
+			})
+</script></body>
