@@ -269,12 +269,12 @@
 				while(check){
 					check = 0;
 					var plusorminus = Math.random() < 0.5 ? 1:-1;
-					var num1 = (Math.random()*100)/240;
+					var num1 = (Math.random()*100)/100;
 					var plusorminus2 = Math.random() < 0.5 ? 1:-1;
-					var num2 = (Math.random()*100)/240;
+					var num2 = (Math.random()*100)/100;
 					nvector = new THREE.Vector3(plusorminus*num1,0,plusorminus2*num2);
 					for(var i = 0 ; i< Obstacles.length;i++){
-					if(Obstacles[i].center.distanceTo(nvector)<30/240){
+					if(Obstacles[i].center.distanceTo(nvector)<30/100){
 								check = 1;
 					}
 					}
@@ -326,7 +326,7 @@
 
 
 			/////////////////////////////////////////////////////////////////////
-			plane = new THREE.Mesh(new THREE.PlaneGeometry(240/240, 240/240), new THREE.MeshBasicMaterial({
+			plane = new THREE.Mesh(new THREE.PlaneGeometry(240/100, 240/100), new THREE.MeshBasicMaterial({
 				transparent: true,
 				opacity: 0.5,
 				visible: true
@@ -344,30 +344,30 @@
 				
 				
 			var mesh = agentMesh ();
-			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/240, 0, (-100 + 200 * Math.random())/240), mesh,target,0));
+			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/100, 0, (-100 + 200 * Math.random())/100), mesh,target,0));
 			
 			var mesh2 = agentMesh2 ();
-			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/240, 0, (-100 + 200 * Math.random())/240), mesh2,target,1));
+			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/100, 0, (-100 + 200 * Math.random())/100), mesh2,target,1));
 			
 			//    pdControl = new PDControllerR2();
 				var number = 0;
 				while(number<3){
 				var plusorminus = Math.random() < 0.5 ? 1:-1
-				var center1 = (Math.random()*100)/240;
+				var center1 = (Math.random()*100)/100;
 				var plusorminus2 = Math.random() < 0.5 ? 1:-1
-				var center2 = (Math.random()*100)/240;
+				var center2 = (Math.random()*100)/100;
 				var hit = 1;
 				var nevector = new THREE.Vector3(center1*plusorminus,0,center2*plusorminus2);
 				if(Obstacles.length>0){
 				for(var j = 0; j < number; j++){
-					if(Obstacles[j].center.distanceTo(nevector)<40/240){
+					if(Obstacles[j].center.distanceTo(nevector)<40/100){
 							hit = 0;
 						break;
 					}
 				}
 				}
 				if(hit){
-					Obstacles.push(new Obstacle (nevector, 20/240));
+					Obstacles.push(new Obstacle (nevector, 20/100));
 				number++;
 				}
 				
