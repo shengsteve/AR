@@ -95,7 +95,7 @@ function init() {
 
 	// create atToolkitContext
 	arToolkitContext = new THREEx.ArToolkitContext({
-		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + "GP/arneeded/camera_para.dat",
+		cameraParametersUrl: THREEx.ArToolkitContext.baseURL + "/data/camera_para.dat",
 		detectionMode: 'mono',
 		maxDetectionRate: 30,
 		canvasWidth: 80*3,
@@ -115,8 +115,8 @@ function init() {
 	scene.add(markerRoot)
 	var artoolkitMarker = new THREEx.ArMarkerControls(arToolkitContext, markerRoot, {
 		type : 'pattern',
-		patternUrl : THREEx.ArToolkitContext.baseURL + "GP/arneeded/patt.hiro"
-		// patternUrl : THREEx.ArToolkitContext.baseURL + "https://qq87.github.io/GP/arneeded/patt.kanji"
+		patternUrl : THREEx.ArToolkitContext.baseURL + "/data/patt.hiro"
+
 	})
 
 	// build a smoothedControls
@@ -135,22 +135,6 @@ function init() {
 
 	let arWorldRoot = smoothedRoot
 	
-	// add a torus knot	
-	/*let geometry	= new THREE.CubeGeometry(1,1,1);
-	let material	= new THREE.MeshNormalMaterial({
-		transparent : true,
-		opacity: 0.5,
-		side: THREE.DoubleSide
-	}); 
-	let mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= geometry.parameters.height/2
-	arWorldRoot.add( mesh );
-	
-	geometry	= new THREE.TorusKnotGeometry(0.3,0.1,64,16);
-	material	= new THREE.MeshNormalMaterial(); 
-	mesh	= new THREE.Mesh( geometry, material );
-	mesh.position.y	= 0.5
-	arWorldRoot.add( mesh );*/
 
 	stats = new Stats();
 	document.body.appendChild( stats.dom );
