@@ -138,11 +138,11 @@
 				this.vel = new THREE.Vector3();
 				this.force = new THREE.Vector3();
 				this.target = new THREE.Vector3();
-				this.size = 3/100;  // half width
-				this.carsize = 10/100;
+				this.size = 3/240;  // half width
+				this.carsize = 10/240;
 				this.mesh = mesh;
-				this.MAXSPEED =  80/100;
-				this.ARRIVAL_R = 30/100;
+				this.MAXSPEED =  80/240;
+				this.ARRIVAL_R = 30/240;
 				this.targetad = target;
 				this.num = sign;
 				//this.nbhd = [];
@@ -168,7 +168,7 @@
 			let point = Obstacles[minlabel].center.clone().sub (this.pos) // c-p
 			let vhat = this.vel.clone().normalize();
 			let proj  = point.dot(vhat);
-			const REACH = 50/100;
+			const REACH = 50/240;
 			const K = 8;
 			if (proj > 0 && proj < REACH) {
 			let perp = new THREE.Vector3();
@@ -187,11 +187,11 @@
 			for(var k =0; k<Agents.length ;k++){
 					if(this.num==k) continue;
 					else{
-						if(this.pos.distanceTo(Agents[k].pos)<10/100){
+						if(this.pos.distanceTo(Agents[k].pos)<10/240){
 							let point =Agents[k].pos.clone().sub (this.pos) // c-p
 							let vhat = this.vel.clone().normalize();
 							let proj  = point.dot(vhat);
-							const REACH = 20/100;
+							const REACH = 20/240;
 							const K = 10;
 							if (proj > 0 && proj < REACH) {
 							let perp = new THREE.Vector3();
@@ -220,10 +220,10 @@
 			this.mesh.position.copy(this.pos);
 			
 			
-			if(this.pos.distanceTo(this.target)<2/100){
+			if(this.pos.distanceTo(this.target)<2/240){
 				var ntarget = newpoint();
 				this.targetad.position.copy(ntarget);
-				this.targetad.position.y = 0.15/100;
+				this.targetad.position.y = 0.15/240;
 				for(var i = 0 ; i <Agents.length;i++)
 				Agents[i].setTarget(ntarget);
 			}
@@ -254,7 +254,7 @@
 			class Obstacle {
 				constructor (center,size) {
 					this.center = center.clone();  
-					this.mesh = new THREE.Mesh (new THREE.CylinderGeometry(size,size,1/100,20),
+					this.mesh = new THREE.Mesh (new THREE.CylinderGeometry(size,size,1/240,20),
 					new THREE.MeshBasicMaterial());
 					this.mesh.position.copy (center);
 					this.size = size;
@@ -271,12 +271,12 @@
 				while(check){
 					check = 0;
 					var plusorminus = Math.random() < 0.5 ? 1:-1;
-					var num1 = (Math.random()*100)/100;
+					var num1 = (Math.random()*100)/240;
 					var plusorminus2 = Math.random() < 0.5 ? 1:-1;
-					var num2 = (Math.random()*100)/100;
+					var num2 = (Math.random()*100)/240;
 					nvector = new THREE.Vector3(plusorminus*num1,0,plusorminus2*num2);
 					for(var i = 0 ; i< Obstacles.length;i++){
-					if(Obstacles[i].center.distanceTo(nvector)<30/100){
+					if(Obstacles[i].center.distanceTo(nvector)<30/240){
 								check = 1;
 					}
 					}
@@ -292,10 +292,10 @@
 			function agentMesh () {
 			// mesh facing +x
 				  let geometry = new THREE.Geometry();
-				  geometry.vertices.push (new THREE.Vector3(10/100,0,0))
-				  geometry.vertices.push (new THREE.Vector3(0,0,-3/100))
-				  geometry.vertices.push (new THREE.Vector3(0,0,3/100))
-				  geometry.vertices.push (new THREE.Vector3(0,3/100,0))
+				  geometry.vertices.push (new THREE.Vector3(10/240,0,0))
+				  geometry.vertices.push (new THREE.Vector3(0,0,-3/240))
+				  geometry.vertices.push (new THREE.Vector3(0,0,3/240))
+				  geometry.vertices.push (new THREE.Vector3(0,3/240,0))
   
 				  geometry.faces.push(new THREE.Face3(0, 3, 2));
 				  geometry.faces.push(new THREE.Face3(0, 2, 1));
@@ -308,10 +308,10 @@
 			function agentMesh2 () {
 				// mesh facing +x
 				  let geometry = new THREE.Geometry();
-				  geometry.vertices.push (new THREE.Vector3(10/100,0,0))
-				  geometry.vertices.push (new THREE.Vector3(0,0,-3/100))
-				  geometry.vertices.push (new THREE.Vector3(0,0,3/100))
-				  geometry.vertices.push (new THREE.Vector3(0,3/100,0))
+				  geometry.vertices.push (new THREE.Vector3(10/240,0,0))
+				  geometry.vertices.push (new THREE.Vector3(0,0,-3/240))
+				  geometry.vertices.push (new THREE.Vector3(0,0,3/240))
+				  geometry.vertices.push (new THREE.Vector3(0,3/240,0))
 				  
 				  geometry.faces.push(new THREE.Face3(0, 3, 2));
 				  geometry.faces.push(new THREE.Face3(0, 2, 1));
@@ -328,7 +328,7 @@
 
 
 			/////////////////////////////////////////////////////////////////////
-			plane = new THREE.Mesh(new THREE.PlaneGeometry(240/100, 240/100), new THREE.MeshBasicMaterial({
+			plane = new THREE.Mesh(new THREE.PlaneGeometry(240/240, 240/240), new THREE.MeshBasicMaterial({
 				transparent: true,
 				opacity: 0.5,
 				visible: true
@@ -338,7 +338,7 @@
 			plane.rotation.x = -Math.PI / 2;
 			
 			
-			target = new THREE.Mesh(new THREE.CircleGeometry(5/100,10/100), new THREE.MeshBasicMaterial({color:'yellow',transparent:true}));
+			target = new THREE.Mesh(new THREE.CircleGeometry(5/240,10/240), new THREE.MeshBasicMaterial({color:'yellow',transparent:true}));
 			target.rotation.x = -Math.PI/2
 
 				
@@ -346,30 +346,30 @@
 				
 				
 			var mesh = agentMesh ();
-			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/100, 0, (-100 + 200 * Math.random())/100), mesh,target,0));
+			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/240, 0, (-100 + 200 * Math.random())/240), mesh,target,0));
 			
 			var mesh2 = agentMesh2 ();
-			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/100, 0, (-100 + 200 * Math.random())/100), mesh2,target,1));
+			Agents.push(new Agent(new THREE.Vector3((-100 + 200 * Math.random())/240, 0, (-100 + 200 * Math.random())/240), mesh2,target,1));
 			
 			//    pdControl = new PDControllerR2();
 				var number = 0;
 				while(number<3){
 				var plusorminus = Math.random() < 0.5 ? 1:-1
-				var center1 = (Math.random()*100)/100;
+				var center1 = (Math.random()*100)/240;
 				var plusorminus2 = Math.random() < 0.5 ? 1:-1
-				var center2 = (Math.random()*100)/100;
+				var center2 = (Math.random()*100)/240;
 				var hit = 1;
 				var nevector = new THREE.Vector3(center1*plusorminus,0,center2*plusorminus2);
 				if(Obstacles.length>0){
 				for(var j = 0; j < number; j++){
-					if(Obstacles[j].center.distanceTo(nevector)<40/100){
+					if(Obstacles[j].center.distanceTo(nevector)<40/240){
 							hit = 0;
 						break;
 					}
 				}
 				}
 				if(hit){
-					Obstacles.push(new Obstacle (nevector, 20/100));
+					Obstacles.push(new Obstacle (nevector, 20/240));
 				number++;
 				}
 				
