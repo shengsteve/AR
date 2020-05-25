@@ -24,7 +24,7 @@ var ob, ob2, obs = [];
 var obsize = 0;
 var i;
 var x1=50 ,y1=10, x2=50 ,y2=10;
-
+var parameter=240;
 
 init();
 animate();
@@ -159,10 +159,10 @@ class Agent {
     this.vel = new THREE.Vector3();
     this.force = new THREE.Vector3();
     this.target = new THREE.Vector3();
-    this.size = 3/240;  // half width
+    this.size = 3/parameter;  // half width
     this.mesh = mesh;
-    this.MAXSPEED = 80/240;
-    this.ARRIVAL_R = 30/240;
+    this.MAXSPEED = 80/parameter;
+    this.ARRIVAL_R = 30/parameter;
     //this.nbhd = [];
     
     // for orientable agent
@@ -176,8 +176,8 @@ class Agent {
 	let vhat = this.vel.clone().normalize();
 	let point = ob.center.clone().sub (this.pos) // c-p
 	let proj  = point.dot(vhat);
-const REACH = 50/240
-const K = 7
+const REACH = 50/parameter
+const K = 10
 	if (proj > 0 && proj < REACH) {
 		let perp = new THREE.Vector3();
 		perp.subVectors (point, vhat.clone().setLength(proj));
@@ -206,7 +206,7 @@ const K = 7
     
     // for orientable agent
     // non PD version
-    if (this.vel.length() > 0.1/240) {
+    if (this.vel.length() > 0.1/parameter) {
 	    	this.angle = Math.atan2 (-this.vel.z, this.vel.x)
     		this.mesh.rotation.y = this.angle
    	}
@@ -240,10 +240,10 @@ const K = 7
 		let proj  = point.dot(vhat);
   	return proj;
   }
-  randomtarget(){
-	if((agent.target.clone().sub(agent.pos)).length() < 1/240){
-  	 x1 = (Math.random()*240-120)/240;
-  	 y1 = (Math.random()*240-120)/240;
+  targetr(){
+	if((agent.target.clone().sub(agent.pos)).length() < 1/parameter){
+  	 x1 = (Math.random()*240-120)/parameter;
+  	 y1 = (Math.random()*240-120)/parameter;
   	 var vectar = new THREE.Vector3( x1, 0, y1 );
   	 for(i = 0 ; i < obsize ; i++){
   	 		ob = obs[i];
@@ -252,7 +252,7 @@ const K = 7
   	    }
   	    else if(i == obsize - 1){
   	    	target.position.copy(vectar);
-  	 			target.position.y = 0.15/240;
+  	 			target.position.y = 0.15/parameter;
   	 			agent.setTarget(vectar);
   	    }
   	 }
@@ -287,10 +287,10 @@ class Agent2 {
     this.vel = new THREE.Vector3();
     this.force = new THREE.Vector3();
     this.target = new THREE.Vector3();
-    this.size = 3/240;  // half width
+    this.size = 3/parameter;  // half width
     this.mesh = mesh;
-    this.MAXSPEED = 65/240;
-    this.ARRIVAL_R = 30/240;
+    this.MAXSPEED = 65/parameter;
+    this.ARRIVAL_R = 30/parameter;
     //this.nbhd = [];
     
     // for orientable agent
@@ -304,8 +304,8 @@ class Agent2 {
 	let vhat = this.vel.clone().normalize();
 	let point = ob2.center.clone().sub (this.pos) // c-p
 	let proj  = point.dot(vhat);
-const REACH = 50/240
-const K = 7
+const REACH = 50/parameter
+const K = 10
 	if (proj > 0 && proj < REACH) {
 		let perp = new THREE.Vector3();
 		perp.subVectors (point, vhat.clone().setLength(proj));
@@ -334,7 +334,7 @@ const K = 7
     
     // for orientable agent
     // non PD version
-    if (this.vel.length() > 0.1/240) {
+    if (this.vel.length() > 0.1/parameter) {
 	    	this.angle = Math.atan2 (-this.vel.z, this.vel.x)
     		this.mesh.rotation.y = this.angle
    	}
@@ -368,10 +368,10 @@ const K = 7
 		let proj  = point.dot(vhat);
   	return proj;
   }
-  randomtarget(){
-	if((agent2.target.clone().sub(agent2.pos)).length() < 1/240){
-  	 x2 = (Math.random()*240-120)/240;
-  	 y2 = (Math.random()*240-120)/240;
+  targetr(){
+	if((agent2.target.clone().sub(agent2.pos)).length() < 1/parameter){
+  	 x2 = (Math.random()*240-120)/parameter;
+  	 y2 = (Math.random()*240-120)/parameter;
   	 var vectar = new THREE.Vector3( x2, 0, y2 );
   	 for(i = 0 ; i < obsize ; i++){
   	 		ob2 = obs[i];
@@ -379,8 +379,8 @@ const K = 7
   	    	break;
   	    }
   	    else if(i == obsize - 1){
-  	    	target.position.copy(vectar);
-  	 			target.position.y = 0.15/240;
+  	    	target2.position.copy(vectar);
+  	 			target2.position.y = 0.15/parameter;
   	 			agent2.setTarget(vectar);
   	    }
   	 }
@@ -413,10 +413,10 @@ const K = 7
   function agentMesh () {
 			// mesh facing +x
 				  let geometry = new THREE.Geometry();
-				  geometry.vertices.push (new THREE.Vector3(0.01,0,0))
-				  geometry.vertices.push (new THREE.Vector3(0,0,-0.003))
-				  geometry.vertices.push (new THREE.Vector3(0,0,0.003))
-				  geometry.vertices.push (new THREE.Vector3(0,0.003,0))
+				  geometry.vertices.push (new THREE.Vector3(0.05,0,0))
+				  geometry.vertices.push (new THREE.Vector3(0,0,-0.015))
+				  geometry.vertices.push (new THREE.Vector3(0,0,0.015))
+				  geometry.vertices.push (new THREE.Vector3(0,0.015,0))
 					
 				  geometry.faces.push(new THREE.Face3(0, 3, 2));
 				  geometry.faces.push(new THREE.Face3(0, 2, 1));
@@ -429,10 +429,10 @@ const K = 7
 			function agentMesh2 () {
 				// mesh facing +x
 				  let geometry = new THREE.Geometry();
-				  geometry.vertices.push (new THREE.Vector3(0.01,0,0))
-				  geometry.vertices.push (new THREE.Vector3(0,0,-0.003))
-				  geometry.vertices.push (new THREE.Vector3(0,0,0.003))
-				  geometry.vertices.push (new THREE.Vector3(0,0.003,0))
+				  geometry.vertices.push (new THREE.Vector3(0.05,0,0))
+				  geometry.vertices.push (new THREE.Vector3(0,0,-0.015))
+				  geometry.vertices.push (new THREE.Vector3(0,0,0.015))
+				  geometry.vertices.push (new THREE.Vector3(0,0.015,0))
 					
 				  geometry.faces.push(new THREE.Face3(0, 3, 2));
 				  geometry.faces.push(new THREE.Face3(0, 2, 1));
@@ -443,7 +443,7 @@ const K = 7
 			}
 	
   plane = new THREE.Group()
-  plane = new THREE.Mesh(new THREE.PlaneGeometry(240/240, 240/240), new THREE.MeshBasicMaterial({
+  plane = new THREE.Mesh(new THREE.PlaneGeometry(240/parameter, 240/parameter), new THREE.MeshBasicMaterial({
     transparent: true,
     opacity: 0.5,
     visible: true
@@ -453,13 +453,22 @@ const K = 7
   plane.rotation.x = -Math.PI / 2;
 
   target = new THREE.Group()
-  target = new THREE.Mesh(new THREE.CircleGeometry(10/240,20/240), new THREE.MeshBasicMaterial({
+  target = new THREE.Mesh(new THREE.CircleGeometry(5/parameter,10/parameter), new THREE.MeshBasicMaterial({
 	color:'yellow',
     transparent:true
 	 }));
   //scene.add(target);
   arWorldRoot.add( target );
   target.rotation.x = -Math.PI/2
+  
+  target2 = new THREE.Group()
+  target2 = new THREE.Mesh(new THREE.CircleGeometry(5/parameter,10/parameter), new THREE.MeshBasicMaterial({
+    color:'yellow',
+    transparent:true
+	 }));
+  //scene.add(target2);
+  arWorldRoot.add( target2 );
+  target2.rotation.x = -Math.PI/2
 
 
 	raycaster = new THREE.Raycaster();
@@ -467,22 +476,22 @@ const K = 7
   ////////////////////////
 let mesh = agentMesh ();
     agent = new THREE.Group()
-    agent = new Agent(new THREE.Vector3((-100/240 + 200/240 * Math.random()), 0, (-100/240 + 200/240 * Math.random())), mesh);
+    agent = new Agent(new THREE.Vector3((-100/parameter + 200/parameter * Math.random()), 0, (-100/parameter + 200/parameter * Math.random())), mesh);
     //scene.add(mesh)
     arWorldRoot.add( mesh );
     
   	let mesh2 = agentMesh2 ();
     agent2 = new THREE.Group()
-    agent2 = new Agent2(new THREE.Vector3((-100/240 + 200/240 * Math.random()), 0, (-100/240 + 200/240 * Math.random())), mesh2);
+    agent2 = new Agent2(new THREE.Vector3((-100/parameter + 200/parameter * Math.random()), 0, (-100/parameter + 200/parameter * Math.random())), mesh2);
     //scene.add(mesh2)
     arWorldRoot.add( mesh2 );
 //    pdControl = new PDControllerR2();
 
-  obs[obsize++] = new Obstacle (new THREE.Vector3(50/240,0,50/240), 20/240)
+  obs[obsize++] = new Obstacle (new THREE.Vector3(50/parameter,0,50/parameter), 20/parameter)
 
-  obs[obsize++] = new Obstacle (new THREE.Vector3(-25/240,0,-60/240), 20/240)
+  obs[obsize++] = new Obstacle (new THREE.Vector3(-25/parameter,0,-60/parameter), 20/parameter)
 
-  obs[obsize++] = new Obstacle (new THREE.Vector3(30/240,0,-40/240), 20/240)
+  obs[obsize++] = new Obstacle (new THREE.Vector3(30/parameter,0,-40/parameter), 20/parameter)
 	
   ob = obs[0];
   
@@ -504,11 +513,11 @@ function animate() {
 	//smoothedRoot.children[1].rotation.x += 0.1;
   
   
-	 agent.randomtarget();
+	 agent.targetr();
 	 agent.mostthread();
 	 agent.update(0.01); 
 	 
-	 agent2.randomtarget();
+	 agent2.targetr();
 	 agent2.mostthread();
 	 agent2.update(0.01); 
 	  
