@@ -17,7 +17,6 @@ var renderer, scene, camera, stats;
 var arToolkitSource, arToolkitContext;
 var smoothedControls, markerRoot, smoothedRoot;
 var puck;
-//var obtarget, obtargetproj = -1;
 var raycaster;
 var pickables = [];
 var ob, ob2, obs = [];
@@ -163,21 +162,19 @@ class Agent {
     this.mesh = mesh;
     this.MAXSPEED = 80/parameter;
     this.ARRIVAL_R = 30/parameter;
-    //this.nbhd = [];
     
     // for orientable agent
     this.angle = 0;
   }
   update(dt) {
     this.accumulateForce();
-//    this.vel.add(this.force.clone().multiplyScalar(dt));
     
 	// collision
 	let vhat = this.vel.clone().normalize();
 	let point = ob.center.clone().sub (this.pos) // c-p
 	let proj  = point.dot(vhat);
-const REACH = 50/parameter
-const K = 10
+	const REACH = 50/parameter
+	const K = 10
 	if (proj > 0 && proj < REACH) {
 		let perp = new THREE.Vector3();
 		perp.subVectors (point, vhat.clone().setLength(proj));
@@ -186,7 +183,6 @@ const K = 10
 			perp.setLength (K*overlap);
 			perp.negate()
       this.force.add (perp);
-			//console.log ("hit:", perp);
 		}
 	}
   
@@ -260,24 +256,23 @@ const K = 10
  		}	
   }
   
-  mostthread(){
-  var obtarget, obtargetproj = 0;
-   for(i = 0, obtarget = -1 ; i < obsize ; i++ ){
+  detect(){
+  var obt, obtproj = 0;
+   for(i = 0, obt = -1 ; i < obsize ; i++ ){
       ob = obs[i];
         if(agent.getoverlap() > 0){
-          if(obtarget == -1){
-            obtarget = i;
-            obtargetproj = agent.getproj();
+          if(obt == -1){
+            obt = i;
+            obtproj = agent.getproj();
           }
-          else if(obtargetproj > agent.getproj()){
-            obtargetproj = agent.getproj();
-            obtarget = i;
+          else if(obtproj > agent.getproj()){
+            obtproj = agent.getproj();
+            obt = i;
           }
         }
 
    }
-   //console.log(''+obtarget);
-   if(obtarget >= 0 && obtarget < obsize) ob = obs[obtarget];
+   if(obt >= 0 && obt < obsize) ob = obs[obt];
   }
 }
 
@@ -291,21 +286,18 @@ class Agent2 {
     this.mesh = mesh;
     this.MAXSPEED = 65/parameter;
     this.ARRIVAL_R = 30/parameter;
-    //this.nbhd = [];
     
     // for orientable agent
     this.angle = 0;
   }
   update(dt) {
-    this.accumulateForce();
-//    this.vel.add(this.force.clone().multiplyScalar(dt));
-    
+    this.accumulateForce();    
 	// collision
 	let vhat = this.vel.clone().normalize();
 	let point = ob2.center.clone().sub (this.pos) // c-p
 	let proj  = point.dot(vhat);
-const REACH = 50/parameter
-const K = 10
+	const REACH = 50/parameter
+	const K = 10
 	if (proj > 0 && proj < REACH) {
 		let perp = new THREE.Vector3();
 		perp.subVectors (point, vhat.clone().setLength(proj));
@@ -314,7 +306,7 @@ const K = 10
 			perp.setLength (K*overlap);
 			perp.negate()
       this.force.add (perp);
-			//console.log ("hit:", perp);
+
 		}
 	}
   
@@ -388,24 +380,23 @@ const K = 10
  		}	
   }
   
-  mostthread(){
-  var obtarget, obtargetproj = 0;
-   for(i = 0, obtarget = -1 ; i < obsize ; i++ ){
+  detect(){
+  var obt, obtproj = 0;
+   for(i = 0, obt = -1 ; i < obsize ; i++ ){
       ob2 = obs[i];
         if(agent2.getoverlap() > 0){
-          if(obtarget == -1){
-            obtarget = i;
-            obtargetproj = agent2.getproj();
+          if(obt == -1){
+            obt = i;
+            obtproj = agent2.getproj();
           }
-          else if(obtargetproj > agent2.getproj()){
-            obtargetproj = agent2.getproj();
-            obtarget = i;
+          else if(obtproj > agent2.getproj()){
+            obtproj = agent2.getproj();
+            obt = i;
           }
         }
 
    }
-   //console.log(''+obtarget);
-   if(obtarget >= 0 && obtarget < obsize) ob2 = obs[obtarget];
+   if(obt >= 0 && obt < obsize) ob2 = obs[obt];
   }
 }
 
@@ -441,6 +432,11 @@ const K = 10
 				  geometry.computeFaceNormals()
 					return new THREE.Mesh (geometry, new THREE.MeshBasicMaterial({color:'blue', wireframe:true}))  
 			}
+	 
+    obs[obsize++] = new Obstacle (new THREE.Vector3(50/parameter,0,50/parameter), 20/parameter)
+    obs[obsize++] = new Obstacle (new THREE.Vector3(-25/parameter,0,-60/parameter), 20/parameter)
+    obs[obsize++] = new Obstacle (new THREE.Vector3(30/parameter,0,-40/parameter), 20/parameter)
+	ob = obs[0];
 	
   plane = new THREE.Group()
   plane = new THREE.Mesh(new THREE.PlaneGeometry(240/parameter, 240/parameter), new THREE.MeshBasicMaterial({
@@ -457,7 +453,7 @@ const K = 10
 	color:'yellow',
     transparent:true
 	 }));
-  //scene.add(target);
+
   arWorldRoot.add( target );
   target.rotation.x = -Math.PI/2
   
@@ -466,15 +462,15 @@ const K = 10
     color:'yellow',
     transparent:true
 	 }));
-  //scene.add(target2);
+
   arWorldRoot.add( target2 );
   target2.rotation.x = -Math.PI/2
 
 
 	raycaster = new THREE.Raycaster();
- // document.addEventListener('mousedown', onDocumentMouseDown, false);
+
   ////////////////////////
-let mesh = agentMesh ();
+	let mesh = agentMesh ();
     agent = new THREE.Group()
     agent = new Agent(new THREE.Vector3((-100/parameter + 200/parameter * Math.random()), 0, (-100/parameter + 200/parameter * Math.random())), mesh);
     //scene.add(mesh)
@@ -487,16 +483,8 @@ let mesh = agentMesh ();
     arWorldRoot.add( mesh2 );
 //    pdControl = new PDControllerR2();
 
-  obs[obsize++] = new Obstacle (new THREE.Vector3(50/parameter,0,50/parameter), 20/parameter)
-
-  obs[obsize++] = new Obstacle (new THREE.Vector3(-25/parameter,0,-60/parameter), 20/parameter)
-
-  obs[obsize++] = new Obstacle (new THREE.Vector3(30/parameter,0,-40/parameter), 20/parameter)
-	
-  ob = obs[0];
   
 }
-
 
 
 function animate() {
@@ -510,9 +498,7 @@ function animate() {
 	arToolkitContext.update( arToolkitSource.domElement )
 
 	smoothedControls.update (markerRoot)
-	//smoothedRoot.children[1].rotation.x += 0.1;
-  
-  
+
 	 agent.targetr();
 	 agent.mostthread();
 	 agent.update(0.01); 
@@ -520,11 +506,7 @@ function animate() {
 	 agent2.targetr();
 	 agent2.mostthread();
 	 agent2.update(0.01); 
-	  
-  
-  
-  
-	
+	    	
 }
 	
 </script></body>
